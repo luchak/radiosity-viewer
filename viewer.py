@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 
 import numpy
@@ -47,12 +49,17 @@ def Display():
   GL.glDrawElementsui(GL.GL_TRIANGLES, indices)
   GLUT.glutSwapBuffers()
 
+def Key(key, x, y):
+  if key == 'q':
+    sys.exit(0)
+
 def main(argv):
   GLUT.glutInit()
   GLUT.glutInitWindowSize(640, 480)
   GLUT.glutCreateWindow('viewer')
   GLUT.glutInitDisplayMode(GLUT.GLUT_DOUBLE | GLUT.GLUT_RGB)
   GLUT.glutDisplayFunc(Display)
+  GLUT.glutKeyboardFunc(Key)
   global mesh
   mesh = triangle_mesh.Load(argv[1])
   mesh.vertices -= numpy.mean(mesh.vertices, axis=0)
