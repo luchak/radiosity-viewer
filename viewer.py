@@ -10,8 +10,19 @@ import OpenGL.GLUT as GLUT
 
 import geometry.triangle_mesh as triangle_mesh
 
-colors = None
 mesh = None
+indices = None
+
+def DrawMesh(mesh):
+  GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
+  GL.glVertexPointerf(mesh.vertices[mesh.faces.flatten()])
+  GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
+  if mesh.HasVertexNormals():
+    GL.glNormalPointerf(mesh.vertex_normals[mesh.face_vertex_normals])
+  else:
+    GL.glNormalPointerf(numpy.repeat(mesh.ComputedFaceNormals(), 3, axis=0))
+  GL.glDrawElementsui(GL.GL_TRIANGLES, numpy.arange(3*len(mesh.faces)))
+
 
 def RunAtInterval(interval_ms, function):
   def Runner(value):
@@ -34,6 +45,9 @@ def Init():
   Reshape(640, 480)
   GL.glMatrixMode(GL.GL_MODELVIEW)
   GL.glLoadIdentity()
+  GL.glEnable(GL.GL_LIGHTING)
+  GL.glEnable(GL.GL_LIGHT0)
+  GL.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST)
   GLU.gluLookAt(0.0, 0.0, 10.0,
                 0.0, 0.0, 0.0,
                 0.0, 1.0, 0.0)
@@ -44,14 +58,8 @@ def Update(dt):
   GLUT.glutPostRedisplay()
 
 def Display():
-  points = mesh.vertices
-  indices = mesh.faces.flatten()
   GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
-  GL.glEnableClientState(GL.GL_VERTEX_ARRAY);
-  GL.glVertexPointerf(points)
-  GL.glEnableClientState(GL.GL_COLOR_ARRAY);
-  GL.glColorPointerf(colors)
-  GL.glDrawElementsui(GL.GL_TRIANGLES, indices)
+  DrawMesh(mesh)
   GLUT.glutSwapBuffers()
 
 def Key(key, x, y):
