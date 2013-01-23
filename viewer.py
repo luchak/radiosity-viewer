@@ -62,6 +62,15 @@ def Display():
   DrawMesh(mesh)
   GLUT.glutSwapBuffers()
 
+def Mouse(button, state, x, y):
+  print 'MOUSE', button, state, x, y
+
+def Motion(x, y):
+  print 'MOTION', x, y
+
+def PassiveMotion(x, y):
+  print 'PASSIVE', x, y
+
 def Key(key, x, y):
   if key == 'q':
     sys.exit(0)
@@ -74,6 +83,9 @@ def main(argv):
   GLUT.glutDisplayFunc(Display)
   GLUT.glutKeyboardFunc(Key)
   GLUT.glutReshapeFunc(Reshape)
+  GLUT.glutMouseFunc(Mouse)
+  GLUT.glutMotionFunc(Motion)
+  GLUT.glutPassiveMotionFunc(PassiveMotion)
   global mesh
   mesh = triangle_mesh.LoadMeshFromOBJFile(argv[1])
   mesh.vertices -= numpy.mean(mesh.vertices, axis=0)
