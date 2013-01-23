@@ -88,8 +88,9 @@ def main(argv):
   GLUT.glutPassiveMotionFunc(PassiveMotion)
   global mesh
   mesh = triangle_mesh.LoadMeshFromOBJFile(argv[1])
-  mesh.vertices -= numpy.mean(mesh.vertices, axis=0)
-  axis_sizes = numpy.array(mesh.AABB()[1]) - numpy.array(mesh.AABB()[0])
+  AABB = mesh.AABB()
+  mesh.vertices -= (AABB[0] + AABB[1]) / 2.0
+  axis_sizes = AABB[1] - AABB[0]
   mesh.vertices *= 5.0 / max(axis_sizes)
   RunAtInterval(16, Update)
   Init()
