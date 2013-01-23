@@ -67,11 +67,10 @@ def main(argv):
   GLUT.glutKeyboardFunc(Key)
   GLUT.glutReshapeFunc(Reshape)
   global mesh
-  mesh = triangle_mesh.Load(argv[1])
+  mesh = triangle_mesh.LoadMeshFromOBJFile(argv[1])
   mesh.vertices -= numpy.mean(mesh.vertices, axis=0)
-  mesh.vertices *= 20.0
-  global colors
-  colors = numpy.random.random(mesh.vertices.shape)
+  axis_sizes = numpy.array(mesh.AABB()[1]) - numpy.array(mesh.AABB()[0])
+  mesh.vertices *= 5.0 / max(axis_sizes)
   RunAtInterval(16, Update)
   Init()
   GLUT.glutMainLoop()
