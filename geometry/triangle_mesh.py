@@ -131,5 +131,5 @@ class TriangleMesh(object):
     return self._cached_computed_face_normals
 
   def AABB(self):
-    return (numpy.min(self.vertices, axis=0),
-            numpy.max(self.vertices, axis=0))
+    return numpy.array((numpy.min(self.vertices, axis=0),
+                        numpy.max(self.vertices, axis=0)))
