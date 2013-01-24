@@ -53,6 +53,7 @@ class ViewerApp(object):
     self.camera_phi = 0.0
     self.camera_r = 10.0
     self.camera_center = numpy.array((0.0, 0.0, 0.0))
+    self.UpdateCameraRotationMatrix()
 
     self.mouse_drag_mode = None
 
@@ -123,15 +124,12 @@ class ViewerApp(object):
       sys.exit(0)
 
   def Mouse(self, button, state, x, y):
-    if button != 0:
-      return
-
     if state == 0:
       self.mouse_last_drag_pos = (x, y)
       modifiers = GLUT.glutGetModifiers()
-      if modifiers & GLUT.GLUT_ACTIVE_ALT:
+      if (button == 1) or (modifiers & GLUT.GLUT_ACTIVE_ALT):
         self.mouse_drag_mode = 'dolly'
-      elif modifiers & GLUT.GLUT_ACTIVE_CTRL:
+      elif (button == 2) or (modifiers & GLUT.GLUT_ACTIVE_CTRL):
         self.mouse_drag_mode = 'pan'
       else:
         self.mouse_drag_mode = 'orbit'
