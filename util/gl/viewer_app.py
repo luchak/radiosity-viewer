@@ -146,8 +146,7 @@ class ViewerApp(object):
     if self.mouse_drag_mode == 'orbit':
       self.camera_phi += dx * math.pi / 180.0
       self.camera_theta += dy * math.pi / 180.0
-      self.camera_theta = min(self.camera_theta, math.pi/2 - 1e-8)
-      self.camera_theta = max(self.camera_theta, -math.pi/2 + 1e-8)
+
       # Future pan movements will need to know which way the camera is oriented
       # in order to correctly accumulate camera translation.
       self.UpdateCameraRotationMatrix()
