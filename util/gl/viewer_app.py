@@ -163,7 +163,7 @@ class ViewerApp(object):
       # rotation point (rotation point stays fixed distance in front of
       # camera), use a trick like below in pan, but with a vector purely in z.
       DOLLY_SCALE_FACTOR = 5e-2
-      self.camera_r += dy * DOLLY_SCALE_FACTOR
+      self.camera_r += -dy * DOLLY_SCALE_FACTOR
     elif self.mouse_drag_mode == 'pan':
       PAN_SCALE_FACTOR = 2e-2
       self.camera_center += numpy.dot(self.rotation_matrix,
