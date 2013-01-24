@@ -39,8 +39,7 @@ def main(argv):
     GL.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST)
 
   def Update(dt):
-    GL.glMatrixMode(GL.GL_MODELVIEW)
-    GL.glRotatef(1.0, 0.0, 1.0, 0.0)
+    pass
 
   def Display():
     DrawMesh(mesh)
