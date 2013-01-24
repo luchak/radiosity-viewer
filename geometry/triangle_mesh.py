@@ -26,8 +26,9 @@ def LoadOBJ(fd):
   current_material = None
 
   def AddVertex(tokens):
-    assert len(tokens) == 3
-    vertices.append([float(x) for x in tokens])
+    # No length check: 4 elements is valid, and Blender for some reason outputs
+    # 6.
+    vertices.append([float(x) for x in tokens[:3]])
 
   def AddVertexNormal(tokens):
     assert len(tokens) == 3
