@@ -10,6 +10,12 @@ import geometry.triangle_mesh as triangle_mesh
 import util.gl.viewer_app as viewer_app
 
 def DrawMesh(mesh):
+  diffuse = numpy.array([0.8, 0.8, 0.8, 1.0])
+  GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse)
+  specular = numpy.array([0.0, 0.0, 0.0, 1.0])
+  GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, specular)
+  ambient = numpy.array([0.1, 0.1, 0.1, 1.0])
+  GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, ambient)
   GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
   GL.glVertexPointerf(mesh.vertices[mesh.faces.flatten()])
   GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
