@@ -12,6 +12,8 @@ import util.gl.viewer_app as viewer_app
 USE_PRECOMPUTED_NORMALS = False
 
 def DrawMesh(mesh):
+  GL.glEnable(GL.GL_LIGHTING)
+  GL.glEnable(GL.GL_LIGHT0)
   diffuse = numpy.array([0.8, 0.8, 0.8, 1.0])
   GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse)
   specular = numpy.array([0.0, 0.0, 0.0, 1.0])
@@ -27,6 +29,17 @@ def DrawMesh(mesh):
     GL.glNormalPointerf(numpy.repeat(mesh.ComputedFaceNormals(), 3, axis=0))
   GL.glDrawElementsui(GL.GL_TRIANGLES, numpy.arange(3*len(mesh.faces)))
 
+def DrawRays(rays):
+  GL.glDisable(GL.GL_LIGHTING)
+  ray_head_color = numpy.array([0.2, 0.2, 1.0, 1.0])
+  ray_tail_color = numpy.array([0.0, 0.0, 0.3, 1.0])
+  GL.glBegin(GL.GL_LINES)
+  for ray in rays:
+    GL.glColor4fv(ray_head_color)
+    GL.glVertex3fv(ray[0])
+    GL.glColor4fv(ray_tail_color)
+    GL.glVertex3fv(ray[0] + ray[1])
+  GL.glEnd()
 
 def main(argv):
   mesh = triangle_mesh.LoadMeshFromOBJFile(argv[1])
@@ -35,9 +48,9 @@ def main(argv):
   axis_sizes = AABB[1] - AABB[0]
   mesh.vertices *= 5.0 / max(axis_sizes)
 
+  rays = []
+
   def Init():
-    GL.glEnable(GL.GL_LIGHTING)
-    GL.glEnable(GL.GL_LIGHT0)
     GL.glHint(GL.GL_PERSPECTIVE_CORRECTION_HINT, GL.GL_NICEST)
 
   def Update(dt):
@@ -45,6 +58,7 @@ def main(argv):
 
   def Display():
     DrawMesh(mesh)
+    DrawRays(rays)
 
   app = viewer_app.ViewerApp(
       init_callback = Init,
@@ -52,6 +66,12 @@ def main(argv):
       display_callback = Display,
       frame_rate = 60,
       )
+
+  def Key(key, x, y):
+    if (key == 'r'):
+      rays.append(app.CastRayThroughWindowCoordinate(x, y))
+
+  app.key_callback = Key
 
   app.Run()
   return 0

@@ -9,6 +9,9 @@ import OpenGL.GL as GL
 import OpenGL.GLU as GLU
 import OpenGL.GLUT as GLUT
 
+def _EmptyThreeArgCallback(arg0, arg1, arg2):
+  pass
+
 def _EmptyOneArgCallback(arg):
   pass
 
@@ -21,6 +24,7 @@ class ViewerApp(object):
       update_callback = _EmptyOneArgCallback,
       display_callback = _EmptyZeroArgCallback,
       init_callback = _EmptyZeroArgCallback,
+      key_callback = _EmptyThreeArgCallback,
       window_name = 'viewer',
       window_size = (640, 480),
       frame_rate = 60,
@@ -29,6 +33,7 @@ class ViewerApp(object):
       ):
     self.update_callback = update_callback
     self.display_callback = display_callback
+    self.key_callback = key_callback
 
     self.ms_per_frame = int(1000.0 / frame_rate)
     self.field_of_view = field_of_view
@@ -86,8 +91,7 @@ class ViewerApp(object):
     self.rotation_matrix = GL.glGetFloatv(GL.GL_MODELVIEW_MATRIX)[:3,:3]
     GL.glPopMatrix()
 
-  def Display(self):
-    # Reset camera
+  def SetupCamera(self):
     GL.glMatrixMode(GL.GL_MODELVIEW)
     GL.glLoadIdentity()
 
@@ -107,6 +111,8 @@ class ViewerApp(object):
     GL.glRotatef(self.camera_phi * 180.0 / math.pi, 0.0, 1.0, 0.0)
     GL.glTranslatef(-self.camera_center[0], -self.camera_center[1], -self.camera_center[2])
 
+  def Display(self):
+    self.SetupCamera()
 
     GL.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT)
     self.display_callback()
@@ -122,6 +128,8 @@ class ViewerApp(object):
   def Key(self, key, x, y):
     if key == 'q':
       sys.exit(0)
+    else:
+      self.key_callback(key, x, y)
 
   def Mouse(self, button, state, x, y):
     if state == 0:
@@ -163,3 +171,28 @@ class ViewerApp(object):
 
   def PassiveMotion(self, x, y):
     pass
+
+  def CastRayThroughWindowCoordinate(self, x, y):
+    self.SetupCamera()
+    modelview = GL.glGetDoublev(GL.GL_MODELVIEW_MATRIX)
+    projection = GL.glGetDoublev(GL.GL_PROJECTION_MATRIX)
+    viewport = GL.glGetIntegerv(GL.GL_VIEWPORT)
+    y = viewport[3] - y
+    near = numpy.asarray(GLU.gluUnProject(
+        x,
+        y,
+        0.0,
+        modelview,
+        projection,
+        viewport
+        ))
+    far = numpy.asarray(GLU.gluUnProject(
+        x,
+        y,
+        1.0,
+        modelview,
+        projection,
+        viewport
+        ))
+
+    return numpy.array((near, far - near))
