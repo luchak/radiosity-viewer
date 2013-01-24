@@ -14,20 +14,30 @@ USE_PRECOMPUTED_NORMALS = False
 def DrawMesh(mesh):
   GL.glEnable(GL.GL_LIGHTING)
   GL.glEnable(GL.GL_LIGHT0)
-  diffuse = numpy.array([0.8, 0.8, 0.8, 1.0])
-  GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse)
-  specular = numpy.array([0.0, 0.0, 0.0, 1.0])
-  GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, specular)
-  ambient = numpy.array([0.1, 0.1, 0.1, 1.0])
-  GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, ambient)
-  GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
-  GL.glVertexPointerf(mesh.vertices[mesh.faces.flatten()])
-  GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
-  if USE_PRECOMPUTED_NORMALS and mesh.HasVertexNormals():
-    GL.glNormalPointerf(mesh.vertex_normals[mesh.face_vertex_normals])
-  else:
-    GL.glNormalPointerf(numpy.repeat(mesh.ComputedFaceNormals(), 3, axis=0))
-  GL.glDrawElementsui(GL.GL_TRIANGLES, numpy.arange(3*len(mesh.faces)))
+  for material, faces in mesh.materials.iteritems():
+    faces = numpy.array(list(faces))
+    if material == 'highlighted':
+      diffuse = numpy.array([1.0, 1.0, 0.0, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse)
+      specular = numpy.array([0.0, 0.0, 0.0, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, specular)
+      ambient = numpy.array([1.0, 1.0, 0.1, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, ambient)
+    else:
+      diffuse = numpy.array([0.8, 0.8, 0.8, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse)
+      specular = numpy.array([0.0, 0.0, 0.0, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, specular)
+      ambient = numpy.array([0.1, 0.1, 0.1, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, ambient)
+    GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
+    GL.glVertexPointerf(mesh.vertices[mesh.faces[faces].flatten()])
+    GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
+    if USE_PRECOMPUTED_NORMALS and mesh.HasVertexNormals():
+      GL.glNormalPointerf(mesh.vertex_normals[mesh.face_vertex_normals[faces]])
+    else:
+      GL.glNormalPointerf(numpy.repeat(mesh.ComputedFaceNormals()[faces], 3, axis=0))
+    GL.glDrawElementsui(GL.GL_TRIANGLES, numpy.arange(3*len(faces)))
 
 def DrawRays(rays):
   GL.glDisable(GL.GL_LIGHTING)

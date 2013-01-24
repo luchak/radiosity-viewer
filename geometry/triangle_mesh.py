@@ -112,10 +112,24 @@ class TriangleMesh(object):
     self.vertex_normals = numpy.asarray(attribs['vertex_normals'])
     self.face_vertex_normals = numpy.asarray(attribs['face_vertex_normals'])
 
+    self.materials = {}
     if 'materials' in attribs:
-      self.materials = dict((name, numpy.asarray(faces)) for name, faces in attribs['materials'].iteritems())
+      self.materials = dict((name, set(faces)) for name, faces in attribs['materials'].iteritems())
+    default_material_faces = set(range(len(self.faces)))
+    for key in self.materials:
+      default_material_faces -= self.materials[key]
+    if len(default_material_faces) > 0:
+      self.materials[''] = default_material_faces
 
     self._cached_computed_face_normals = None
+
+  def SetMaterialForFaces(self, faces, material_name):
+    faces = set(faces)
+    for key in self.materials:
+      self.materials[key] -= faces
+    if material_name not in self.materials:
+      self.materials[material_name] = set()
+    self.materials[material_name] |= faces
 
   def HasVertexNormals(self):
     return len(self.vertex_normals) > 0
