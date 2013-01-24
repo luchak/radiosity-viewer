@@ -9,6 +9,8 @@ import OpenGL.GL as GL
 import geometry.triangle_mesh as triangle_mesh
 import util.gl.viewer_app as viewer_app
 
+USE_PRECOMPUTED_NORMALS = False
+
 def DrawMesh(mesh):
   diffuse = numpy.array([0.8, 0.8, 0.8, 1.0])
   GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse)
@@ -19,7 +21,7 @@ def DrawMesh(mesh):
   GL.glEnableClientState(GL.GL_VERTEX_ARRAY)
   GL.glVertexPointerf(mesh.vertices[mesh.faces.flatten()])
   GL.glEnableClientState(GL.GL_NORMAL_ARRAY)
-  if mesh.HasVertexNormals():
+  if USE_PRECOMPUTED_NORMALS and mesh.HasVertexNormals():
     GL.glNormalPointerf(mesh.vertex_normals[mesh.face_vertex_normals])
   else:
     GL.glNormalPointerf(numpy.repeat(mesh.ComputedFaceNormals(), 3, axis=0))
