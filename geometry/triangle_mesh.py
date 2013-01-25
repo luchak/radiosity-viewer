@@ -199,4 +199,13 @@ class TriangleMesh(object):
         max_s0 = norm_s0i
 
     return intersected_faces[closest_triangle]
-    
+
+  def AllTriangleCentroidsVisibleFromPoint(self, p):
+    visible_faces = set()
+
+    for i, centroid in enumerate(self.Centroids()):
+      hit_triangle = self.ClosestTriangleRayIntersection(numpy.array((p, centroid-p)))
+      if i == hit_triangle:
+        visible_faces.add(i)
+
+    return visible_faces

@@ -15,6 +15,8 @@ def DrawMesh(mesh):
   GL.glEnable(GL.GL_LIGHTING)
   GL.glEnable(GL.GL_LIGHT0)
   for material, faces in mesh.materials.iteritems():
+    if len(faces) == 0:
+      continue
     faces = numpy.array(list(faces))
     if material == 'highlighted':
       diffuse = numpy.array([1.0, 1.0, 0.0, 1.0])
@@ -22,6 +24,13 @@ def DrawMesh(mesh):
       specular = numpy.array([0.0, 0.0, 0.0, 1.0])
       GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, specular)
       ambient = numpy.array([1.0, 1.0, 0.1, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, ambient)
+    elif material == 'visible':
+      diffuse = numpy.array([1.0, 0.8, 0.8, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_DIFFUSE, diffuse)
+      specular = numpy.array([0.0, 0.0, 0.0, 1.0])
+      GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_SPECULAR, specular)
+      ambient = numpy.array([1.0, 0.8, 0.8, 1.0])
       GL.glMaterialfv(GL.GL_FRONT_AND_BACK, GL.GL_AMBIENT, ambient)
     else:
       diffuse = numpy.array([0.8, 0.8, 0.8, 1.0])
@@ -84,6 +93,11 @@ def main(argv):
       closest_triangle = mesh.ClosestTriangleRayIntersection(ray)
       if closest_triangle is not None:
         mesh.SetMaterialForFaces([closest_triangle], 'highlighted')
+
+    if (key == 'v'):
+      visible_triangles = mesh.AllTriangleCentroidsVisibleFromPoint(app.CameraPosition())
+      mesh.SetMaterialForFaces(set(range(len(mesh.faces))) - visible_triangles, 'default')
+      mesh.SetMaterialForFaces(visible_triangles, 'visible')
 
   app.key_callback = Key
 

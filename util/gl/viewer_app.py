@@ -111,6 +111,11 @@ class ViewerApp(object):
     GL.glRotatef(self.camera_phi * 180.0 / math.pi, 0.0, 1.0, 0.0)
     GL.glTranslatef(-self.camera_center[0], -self.camera_center[1], -self.camera_center[2])
 
+  def CameraPosition(self):
+    self.SetupCamera()
+    modelview_matrix = GL.glGetFloatv(GL.GL_MODELVIEW_MATRIX)
+    return numpy.dot(modelview_matrix, numpy.array((0.0, 0.0, self.camera_r, 1.0)))[:3]
+
   def Display(self):
     self.SetupCamera()
 
