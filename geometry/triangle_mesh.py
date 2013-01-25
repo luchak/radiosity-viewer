@@ -151,6 +151,9 @@ class TriangleMesh(object):
     return numpy.array((numpy.min(self.vertices, axis=0),
                         numpy.max(self.vertices, axis=0)))
 
+  def Centroids(self):
+    return numpy.mean(self.vertices[self.faces], axis=1)
+
   def ClosestTriangleRayIntersection(self, ray):
     # see http://graphics.stanford.edu/courses/cs348b-04/rayhomo.pdf
     r1 = numpy.repeat(ray[1][numpy.newaxis,:], len(self.faces), axis=0)
