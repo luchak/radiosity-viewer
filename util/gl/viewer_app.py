@@ -80,7 +80,7 @@ class ViewerApp(object):
     GL.glViewport(0, 0, w, h)
     GL.glMatrixMode(GL.GL_PROJECTION)
     GL.glLoadIdentity()
-    GLU.gluPerspective(self.field_of_view, float(w)/float(h), 1.0, 100.0)
+    GLU.gluPerspective(self.field_of_view, float(w)/float(h), 0.5, 100.0)
 
   def UpdateCameraRotationMatrix(self):
     GL.glMatrixMode(GL.GL_MODELVIEW)
