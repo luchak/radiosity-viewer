@@ -81,7 +81,9 @@ def main(argv):
     if (key == 'r'):
       ray = app.CastRayThroughWindowCoordinate(x, y)
       rays.append(app.CastRayThroughWindowCoordinate(x, y))
-      mesh.SetMaterialForFaces(mesh.TrianglesIntersectedByRay(ray), 'highlighted')
+      closest_triangle = mesh.ClosestTriangleRayIntersection(ray)
+      if closest_triangle is not None:
+        mesh.SetMaterialForFaces([closest_triangle], 'highlighted')
 
   app.key_callback = Key
 

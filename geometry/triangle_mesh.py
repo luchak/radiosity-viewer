@@ -151,9 +151,9 @@ class TriangleMesh(object):
     return numpy.array((numpy.min(self.vertices, axis=0),
                         numpy.max(self.vertices, axis=0)))
 
-  def TrianglesIntersectedByRay(self, ray):
+  def ClosestTriangleRayIntersection(self, ray):
     # see http://graphics.stanford.edu/courses/cs348b-04/rayhomo.pdf
-    r1 = numpy.repeat(ray[1][numpy.newaxis,:], len(self.faces), axis=0) * 1e-4
+    r1 = numpy.repeat(ray[1][numpy.newaxis,:], len(self.faces), axis=0)
     r0 = numpy.repeat(ray[0][numpy.newaxis,:], len(self.faces), axis=0)
     r1 += r0
     p0 = self.vertices[self.faces[:,0]]
@@ -174,6 +174,9 @@ class TriangleMesh(object):
 
     intersected_faces = numpy.arange(len(self.faces))[in_triangle]
 
+    if len(intersected_faces) == 0:
+      return None
+
     ps0 = self.vertices[self.faces[intersected_faces, 0]]
     ps1 = self.vertices[self.faces[intersected_faces, 1]]
     ps2 = self.vertices[self.faces[intersected_faces, 2]]
@@ -184,12 +187,15 @@ class TriangleMesh(object):
     # s1 negative: before start
     s0 = TetVolumesFromPoints(ps0, ps1, ps2, rs1)
     s1 = TetVolumesFromPoints(ps2, ps1, ps0, rs0)
+    closest_triangle = 0
+    max_s0 = -1e-8
 
     for i, s0i, s1i in zip(range(len(s0)), s0, s1):
-      if in_triangle_front[intersected_faces[i]]:
-        s0i = -s0i
-        s1i = -s1i
-      print s0i, s1i
+      norm_s0 = s0i / (s0i + s1i)
 
-    return intersected_faces
+      if norm_s0 < 1.0 and norm_s0 > max_s0:
+        closest_triangle = i
+        max_s0 = norm_s0
+
+    return intersected_faces[closest_triangle]
     
