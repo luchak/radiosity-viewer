@@ -124,6 +124,8 @@ class TriangleMesh(object):
     self._cached_computed_face_normals = None
 
   def SetMaterialForFaces(self, faces, material_name):
+    if len(faces) == 0:
+      return
     faces = set(faces)
     for key in self.materials:
       self.materials[key] -= faces
@@ -148,3 +150,46 @@ class TriangleMesh(object):
   def AABB(self):
     return numpy.array((numpy.min(self.vertices, axis=0),
                         numpy.max(self.vertices, axis=0)))
+
+  def TrianglesIntersectedByRay(self, ray):
+    # see http://graphics.stanford.edu/courses/cs348b-04/rayhomo.pdf
+    r1 = numpy.repeat(ray[1][numpy.newaxis,:], len(self.faces), axis=0) * 1e-4
+    r0 = numpy.repeat(ray[0][numpy.newaxis,:], len(self.faces), axis=0)
+    r1 += r0
+    p0 = self.vertices[self.faces[:,0]]
+    p1 = self.vertices[self.faces[:,1]]
+    p2 = self.vertices[self.faces[:,2]]
+
+    def TetVolumesFromPoints(p0, p1, p2, p3):
+      return numpy.sum((p1 - p0) * numpy.cross(p2 - p0, p3 - p0), axis=1) * (1.0 / 6.0)
+
+    u0 = TetVolumesFromPoints(r0, r1, p1, p2)
+    u1 = TetVolumesFromPoints(r0, r1, p2, p0)
+    u2 = TetVolumesFromPoints(r0, r1, p0, p1)
+
+    in_triangle_front = numpy.logical_and(u0 <= 0.0, numpy.logical_and(u1 <= 0.0, u2 <= 0.0))
+    in_triangle_back = numpy.logical_and(u0 >= 0.0, numpy.logical_and(u1 >= 0.0, u2 >= 0.0))
+
+    in_triangle = numpy.logical_or(in_triangle_front, in_triangle_back)
+
+    intersected_faces = numpy.arange(len(self.faces))[in_triangle]
+
+    ps0 = self.vertices[self.faces[intersected_faces, 0]]
+    ps1 = self.vertices[self.faces[intersected_faces, 1]]
+    ps2 = self.vertices[self.faces[intersected_faces, 2]]
+    rs0 = r0[intersected_faces]
+    rs1 = r1[intersected_faces]
+
+    # s0 negative: past end
+    # s1 negative: before start
+    s0 = TetVolumesFromPoints(ps0, ps1, ps2, rs1)
+    s1 = TetVolumesFromPoints(ps2, ps1, ps0, rs0)
+
+    for i, s0i, s1i in zip(range(len(s0)), s0, s1):
+      if in_triangle_front[intersected_faces[i]]:
+        s0i = -s0i
+        s1i = -s1i
+      print s0i, s1i
+
+    return intersected_faces
+    

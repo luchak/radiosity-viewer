@@ -79,7 +79,9 @@ def main(argv):
 
   def Key(key, x, y):
     if (key == 'r'):
+      ray = app.CastRayThroughWindowCoordinate(x, y)
       rays.append(app.CastRayThroughWindowCoordinate(x, y))
+      mesh.SetMaterialForFaces(mesh.TrianglesIntersectedByRay(ray), 'highlighted')
 
   app.key_callback = Key
 
