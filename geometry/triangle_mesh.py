@@ -186,19 +186,17 @@ class TriangleMesh(object):
     rs0 = r0[intersected_faces]
     rs1 = r1[intersected_faces]
 
-    # s0 negative: past end
-    # s1 negative: before start
     s0 = TetVolumesFromPoints(ps0, ps1, ps2, rs1)
     s1 = TetVolumesFromPoints(ps2, ps1, ps0, rs0)
+    norm_s0 = s0 / (s0 + s1)
+    norm_s1 = s1 / (s0 + s1)
     closest_triangle = 0
-    max_s0 = -1e-8
+    max_s0 = -1e8
 
-    for i, s0i, s1i in zip(range(len(s0)), s0, s1):
-      norm_s0 = s0i / (s0i + s1i)
-
-      if norm_s0 < 1.0 and norm_s0 > max_s0:
+    for i, (norm_s0i, norm_s1i) in enumerate(zip(norm_s0, norm_s1)):
+      if norm_s1i > 0.0 and norm_s0i > max_s0:
         closest_triangle = i
-        max_s0 = norm_s0
+        max_s0 = norm_s0i
 
     return intersected_faces[closest_triangle]
     
