@@ -4,6 +4,8 @@ import collections
 
 import numpy
 
+import geometry.mesh_ray_intersection_tester as mesh_ray_intersection_tester
+
 def LoadMeshFromOBJFile(filename):
   return TriangleMesh(LoadOBJFromFile(filename))
 
@@ -154,31 +156,21 @@ class TriangleMesh(object):
   def Centroids(self):
     return numpy.mean(self.vertices[self.faces], axis=1)
 
-  def ClosestTriangleRayIntersection(self, ray):
+  def ClosestTriangleRayIntersection(self, ray, tester = None):
+    if tester is None:
+      tester = mesh_ray_intersection_tester.MeshRayIntersectionTester(self)
+    intersected_faces = tester.RayIntersections(ray)
+
+    if len(intersected_faces) == 0:
+      return None
+
     # see http://graphics.stanford.edu/courses/cs348b-04/rayhomo.pdf
     r1 = numpy.repeat(ray[1][numpy.newaxis,:], len(self.faces), axis=0)
     r0 = numpy.repeat(ray[0][numpy.newaxis,:], len(self.faces), axis=0)
     r1 += r0
-    p0 = self.vertices[self.faces[:,0]]
-    p1 = self.vertices[self.faces[:,1]]
-    p2 = self.vertices[self.faces[:,2]]
 
     def TetVolumesFromPoints(p0, p1, p2, p3):
       return numpy.sum((p1 - p0) * numpy.cross(p2 - p0, p3 - p0), axis=1) * (1.0 / 6.0)
-
-    u0 = TetVolumesFromPoints(r0, r1, p1, p2)
-    u1 = TetVolumesFromPoints(r0, r1, p2, p0)
-    u2 = TetVolumesFromPoints(r0, r1, p0, p1)
-
-    in_triangle_front = numpy.logical_and(u0 <= 0.0, numpy.logical_and(u1 <= 0.0, u2 <= 0.0))
-    in_triangle_back = numpy.logical_and(u0 >= 0.0, numpy.logical_and(u1 >= 0.0, u2 >= 0.0))
-
-    in_triangle = numpy.logical_or(in_triangle_front, in_triangle_back)
-
-    intersected_faces = numpy.arange(len(self.faces))[in_triangle]
-
-    if len(intersected_faces) == 0:
-      return None
 
     ps0 = self.vertices[self.faces[intersected_faces, 0]]
     ps1 = self.vertices[self.faces[intersected_faces, 1]]
@@ -202,9 +194,10 @@ class TriangleMesh(object):
 
   def AllTriangleCentroidsVisibleFromPoint(self, p):
     visible_faces = set()
+    tester = mesh_ray_intersection_tester.MeshRayIntersectionTester(self)
 
     for i, centroid in enumerate(self.Centroids()):
-      hit_triangle = self.ClosestTriangleRayIntersection(numpy.array((p, centroid-p)))
+      hit_triangle = self.ClosestTriangleRayIntersection(numpy.array((p, centroid-p)), tester=tester)
       if i == hit_triangle:
         visible_faces.add(i)
 
